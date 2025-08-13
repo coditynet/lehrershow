@@ -5,6 +5,8 @@ import { ThemeProvider } from "./theme-provider";
 import { Toaster } from "./ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "@/app/ConvexClientProvider";
+import { shadcn } from '@clerk/themes'
+
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -14,7 +16,7 @@ export default function Providers({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={{theme: shadcn}}>
 
       <ThemeProvider
         attribute="class"
