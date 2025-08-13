@@ -16,7 +16,7 @@ export default function Providers({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider appearance={{theme: shadcn}}>
+    <ClerkProvider appearance={{theme: shadcn}} afterSignOutUrl={"/sign-in"}>
 
       <ThemeProvider
         attribute="class"
