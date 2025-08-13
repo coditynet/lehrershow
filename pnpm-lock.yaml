@@ -23,6 +23,9 @@ importers:
       '@clerk/themes':
         specifier: ^2.4.8
         version: 2.4.8
+      '@clerk/types':
+        specifier: ^4.76.0
+        version: 4.76.0
       '@hookform/resolvers':
         specifier: ^5.2.1
         version: 5.2.1(react-hook-form@7.62.0(react@19.1.1))

@@ -27,9 +27,9 @@ export default function SignUpPage() {
                 transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
               >
                 <img
-                  src="/logo-full"
+                  src="/logo-full.png"
                   alt="Illustration"
-                  className="mx-auto h-auto w-full md:w-90"
+                  className="mx-auto h-auto w-full md:w-90 filter dark:invert dark:brightness-200"
                 />
               </motion.div>
             </div>

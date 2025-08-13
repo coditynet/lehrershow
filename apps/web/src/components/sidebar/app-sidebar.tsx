@@ -105,14 +105,14 @@ function SidebarLogo() {
           <img
             src="/logo-full.png"
             alt="Logo"
-            className="h-12 w-auto max-w-[150px] group-data-[collapsible=icon]:h-10 transition-[height,max-width] duration-200 ease-in-out"
+            className="h-12 w-auto max-w-[150px] group-data-[collapsible=icon]:h-10 transition-[height,max-width] duration-200 ease-in-out filter dark:invert dark:brightness-200"
             style={{ objectFit: "contain" }}
           />
         ) : (
           <img
             src="/logo.png"
             alt="Logo"
-            className="h-8 w-8 group-data-[collapsible=icon]:h-10 transition-[height,max-width] duration-200 ease-in-out"
+            className="h-8 w-8 group-data-[collapsible=icon]:h-10 transition-[height,max-width] duration-200 ease-in-out filter dark:invert dark:brightness-200"
             style={{ objectFit: "contain" }}
           />
         )}

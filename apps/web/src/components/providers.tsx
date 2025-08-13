@@ -6,6 +6,7 @@ import { Toaster } from "./ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "@/app/ConvexClientProvider";
 import { shadcn } from '@clerk/themes'
+import { deDE } from "@/lib/clerkLocalization";
 
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -16,7 +17,7 @@ export default function Providers({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider appearance={{theme: shadcn}} afterSignOutUrl={"/sign-in"}>
+    <ClerkProvider appearance={{theme: shadcn}} afterSignOutUrl={"/sign-in"} localization={deDE}>
 
       <ThemeProvider
         attribute="class"
