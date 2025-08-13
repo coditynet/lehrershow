@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  song: defineTable({
+  songs: defineTable({
     submitter: v.object({
       name: v.string(),
       email: v.string(),
@@ -12,7 +12,7 @@ export default defineSchema({
 
     notes: v.optional(v.string()),
     
-    accepted: v.boolean(),
+    isAccepted: v.boolean(),
 
     submissionType: v.union(
       v.literal("search"),
@@ -23,5 +23,5 @@ export default defineSchema({
     songSearch: v.optional(v.string()), 
     youtubeUrl: v.optional(v.string()), 
     songFile: v.optional(v.string()),
-  }),
+  }).index("by_accepted", ["isAccepted"])
 });
