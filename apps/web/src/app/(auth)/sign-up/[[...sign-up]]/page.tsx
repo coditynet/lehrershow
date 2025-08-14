@@ -7,13 +7,13 @@ import { Bricolage_Grotesque } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Particles } from "@/components/ui/particles";
 import { Spotlight } from "@/components/ui/spotlight";
-import { SignedOut, SignIn } from "@clerk/nextjs";
+import { SignedOut, SignUp } from "@clerk/nextjs";
 
 const brico = Bricolage_Grotesque({
   subsets: ["latin"],
 });
 
-export default function LoginForm() {
+export default function SignUpPage() {
   const { resolvedTheme } = useTheme();
   const [color, setColor] = useState("#ffffff");
 
@@ -52,36 +52,25 @@ export default function LoginForm() {
               brico.className
             )}
           >
-            Welcome{" "}
+            Create{" "}
             <span className="bg-primary from-foreground to-primary via-rose-300 bg-clip-text text-transparent dark:bg-gradient-to-b">
-              Back
+              Account
             </span>
           </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="text-muted-foreground mb-8 text-lg"
-          >
-            Sign in to your account to continue
-          </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <SignIn
+            <SignUp
               appearance={{
                 elements: {
-                  card: "bg-white/5 backdrop-blur-md ",
-                  header: "hidden",
-                  headerTitle: "hidden", 
-                  headerSubtitle: "hidden", 
+                  card: "bg-white/5 backdrop-blur-md",
                   footer: "hidden",
                   formButtonPrimary:
                     "bg-gradient-to-b from-rose-500 to-rose-700 text-white font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300",
+
                   formFieldInput:
                     "bg-white/5 border border-primary/20 rounded-xl text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-primary/30 backdrop-blur-md",
                 },
