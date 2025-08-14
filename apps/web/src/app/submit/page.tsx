@@ -123,7 +123,7 @@ export default function SubmitSongPage() {
       name: "",
       email: "",
       anmerkungen: "",
-      submissionType: "search",
+      submissionType: "youtube",
       songSearch: "",
       youtubeUrl: "",
       songFile: "",
