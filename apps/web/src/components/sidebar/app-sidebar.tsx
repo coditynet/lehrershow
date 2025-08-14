@@ -62,7 +62,6 @@ const data: {
           title: "Songs",
           url: "/dashboard/songs",
           icon: UsersRound,
-          disabled: true
         },
         {
           title: "Anfragen",
