@@ -80,7 +80,6 @@ const data: {
           title: "Nutzer",
           url: "/dashboard/settings/users",
           icon: UsersRound,
-          disabled: true
         },
         {
           title: "Registrierung",

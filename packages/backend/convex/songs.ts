@@ -139,7 +139,7 @@ export const createSong = internalMutation({
       artist: args.artist ?? undefined,
       songFile: args.songFile?.trim() ?? undefined,
       additionalInfo: args.additionalInfo?.trim() ?? undefined,
-      isAccepted: false
+      isAccepted: false,
     });
 
     return { id };
@@ -162,6 +162,7 @@ export const addSong = action({
     songSearch: v.optional(v.string()),
     youtubeUrl: v.optional(v.string()),
     songFile: v.optional(v.string()),
+    turnstileToken: v.string(),
   },
   handler: async (ctx, args) => {
     const {
@@ -172,7 +173,17 @@ export const addSong = action({
       songSearch,
       youtubeUrl,
       songFile,
+      turnstileToken,
     } = args;
+
+    if (!turnstileToken) throw new ConvexError("Captcha token required.");
+
+    const verifyResult: { success?: boolean } = await ctx.runAction(api.turnstile.verify, {
+      token: turnstileToken,
+    });
+    if (!verifyResult || !verifyResult.success) {
+      throw new ConvexError("Captcha verification failed.");
+    }
 
     let youtubeId = undefined;
     let youtubeTitle = undefined;
@@ -199,7 +210,6 @@ export const addSong = action({
 
       youtubeId = id;
 
-      // Explicitly type the youtubeInfo variable
       const youtubeInfo: { title?: string; channelName?: string; } = await ctx.runAction(api.songs.fetchYouTubeInfo, {
         videoId: id,
       });
@@ -220,6 +230,24 @@ export const addSong = action({
       throw new ConvexError("Invalid submission type.");
     }
 
+    let finalTitle: string | undefined;
+    let finalArtist: string | undefined;
+
+    if (submissionType === "youtube") {
+      finalTitle = youtubeTitle;
+      finalArtist = youtubeChannelName || name; 
+    } else if (submissionType === "search") {
+      finalTitle = songSearch;
+      finalArtist = name; 
+    } else if (submissionType === "file") {
+      finalTitle = "Uploaded Song"; 
+      finalArtist = name; 
+    } else {
+      finalTitle = undefined;
+      finalArtist = undefined;
+    }
+
+
     const result: { id: Id<"songs"> } = await ctx.runMutation(internal.songs.createSong, {
       name,
       email,
@@ -227,8 +255,8 @@ export const addSong = action({
       submissionType,
       songSearch,
       youtubeId,
-      title: youtubeTitle,
-      artist: youtubeChannelName || name,
+      title: finalTitle, 
+      artist: finalArtist, 
       songFile,
     });
 
