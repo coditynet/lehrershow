@@ -146,7 +146,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <SignOutButton>
+            <SignOutButton redirectUrl="/sign-in">
               <DropdownMenuItem>
                 <LogOut />
                 Abmelden
