@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack --port=3001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy": "turbo -F @ls/backend deploy"
   },
   "dependencies": {
     "@clerk/elements": "^0.23.52",
