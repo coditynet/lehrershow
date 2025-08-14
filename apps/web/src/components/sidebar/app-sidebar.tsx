@@ -84,9 +84,8 @@ const data: {
         },
         {
           title: "Registrierung",
-          url: "/dashboard/settings/registration",
+          url: "/dashboard/settings/registrations",
           icon: Boxes,
-          disabled: true
         },
       ],
     },

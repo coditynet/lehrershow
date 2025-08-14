@@ -8,6 +8,9 @@ export default defineSchema({
       email: v.string(),
     }),
 
+    title: v.optional(v.string()),
+    artist: v.optional(v.string()),
+
     additionalInfo: v.optional(v.string()),
 
     notes: v.optional(v.string()),
@@ -21,7 +24,10 @@ export default defineSchema({
     ),
 
     songSearch: v.optional(v.string()), 
-    youtubeUrl: v.optional(v.string()), 
+    youtubeId: v.optional(v.string()), 
     songFile: v.optional(v.string()),
-  }).index("by_accepted", ["isAccepted"])
+  }).index("by_accepted", ["isAccepted"]),
+  settings: defineTable({
+    allowNewSubmissions: v.boolean(),
+  })
 });

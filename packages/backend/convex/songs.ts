@@ -1,15 +1,11 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, action, internalMutation } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
+import { api, internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 
 /**
  * Expect an environment variable UPLOADTHING_ID that contains the
  * subdomain/tenant id part of the UploadThing URL (e.g. `epsx952932`).
- *
- * Example valid URL:
- *   https://epsx952932.ufs.sh/f/tNGxt6IZe7CDXwOTNSo4D57yKXqnux8wig0bpotAhcmlzrkN
- *
- * Add to your .env:
- *   UPLOADTHING_ID=epsx952932
  */
 const UPLOADTHING_ID = process.env.UPLOADTHING_ID;
 if (!UPLOADTHING_ID) {
@@ -18,12 +14,21 @@ if (!UPLOADTHING_ID) {
   );
 }
 
+/**
+ * YouTube Data API v3 key - add this to your environment variables
+ */
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+if (!YOUTUBE_API_KEY) {
+  throw new Error(
+    "Missing env var YOUTUBE_API_KEY. Please set YOUTUBE_API_KEY in your environment."
+  );
+}
+
 const YOUTUBE_URL_REGEX =
   /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([A-Za-z0-9_-]{11})(?:\S+)?$/i;
 
 /**
  * Extract a YouTube video id from a variety of YouTube URLs (and plain IDs).
- * Returns the 11-character id or null if none found.
  */
 function extractYouTubeId(input: string): string | null {
   if (!input) return null;
@@ -33,7 +38,6 @@ function extractYouTubeId(input: string): string | null {
     return match[1];
   }
 
-  // If the input itself is exactly a 11-char video id
   const plainId = input.trim();
   if (/^[A-Za-z0-9_-]{11}$/.test(plainId)) {
     return plainId;
@@ -44,8 +48,6 @@ function extractYouTubeId(input: string): string | null {
 
 /**
  * Validate an UploadThing file URL using the configured UPLOADTHING_ID.
- * Accepts https only, host must be `${UPLOADTHING_ID}.ufs.sh`.
- * Path must start with `/f/` followed by a file key (alphanumeric + - _).
  */
 function isValidUploadThingUrl(url: string) {
   try {
@@ -68,7 +70,86 @@ function isValidUploadThingUrl(url: string) {
   }
 }
 
-export const addSong = mutation({
+/**
+ * Action to fetch YouTube video info using YouTube Data API v3
+ */
+export const fetchYouTubeInfo = action({
+  args: {
+    videoId: v.string(),
+  },
+  handler: async (ctx, { videoId }) => {
+    try {
+      const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${YOUTUBE_API_KEY}`;
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) {
+        console.warn(`YouTube API returned ${response.status} for video ${videoId}`);
+        return { title: undefined, channelName: undefined };
+      }
+      
+      const data = await response.json();
+      
+      if (!data.items || data.items.length === 0) {
+        console.warn(`No video found for ID ${videoId}`);
+        return { title: undefined, channelName: undefined };
+      }
+      
+      const snippet = data.items[0].snippet;
+      
+      return {
+        title: snippet.title || undefined,
+        channelName: snippet.channelTitle || undefined,
+      };
+    } catch (error) {
+      console.warn(`Failed to fetch YouTube info for video ${videoId}:`, error);
+      return { title: undefined, channelName: undefined };
+    }
+  },
+});
+
+/**
+ * Internal mutation to create a song record
+ */
+export const createSong = internalMutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    additionalInfo: v.optional(v.string()),
+    submissionType: v.union(
+      v.literal("search"),
+      v.literal("youtube"),
+      v.literal("file")
+    ),
+    songSearch: v.optional(v.string()),
+    youtubeId: v.optional(v.string()),
+    title: v.optional(v.string()),
+    artist: v.optional(v.string()),
+    songFile: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const id = await ctx.db.insert("songs", {
+      submitter: {
+        name: args.name.trim(),
+        email: args.email.trim(),
+      },
+      submissionType: args.submissionType,
+      songSearch: args.songSearch?.trim() ?? undefined,
+      youtubeId: args.youtubeId ?? undefined,
+      title: args.title ?? undefined,
+      artist: args.artist ?? undefined,
+      songFile: args.songFile?.trim() ?? undefined,
+      additionalInfo: args.additionalInfo?.trim() ?? undefined,
+      isAccepted: false
+    });
+
+    return { id };
+  },
+});
+
+/**
+ * Main action to add a song (handles validation and external API calls)
+ */
+export const addSong = action({
   args: {
     name: v.string(),
     email: v.string(),
@@ -93,7 +174,9 @@ export const addSong = mutation({
       songFile,
     } = args;
 
-    let youtubeId: string;
+    let youtubeId = undefined;
+    let youtubeTitle = undefined;
+    let youtubeChannelName = undefined;
 
     if (!name || !name.trim()) throw new ConvexError("Name is required.");
 
@@ -114,7 +197,15 @@ export const addSong = mutation({
         throw new ConvexError("Please provide a valid YouTube URL or video id.");
       }
 
-      youtubeId = id
+      youtubeId = id;
+
+      // Explicitly type the youtubeInfo variable
+      const youtubeInfo: { title?: string; channelName?: string; } = await ctx.runAction(api.songs.fetchYouTubeInfo, {
+        videoId: id,
+      });
+      youtubeTitle = youtubeInfo.title;
+      youtubeChannelName = youtubeInfo.channelName;
+      
     } else if (submissionType === "file") {
       if (!songFile || !songFile.trim()) {
         throw new ConvexError("For file submissions, provide a songFile URL.");
@@ -126,37 +217,38 @@ export const addSong = mutation({
         );
       }
     } else {
-      throw new ConvexError("Invalid submission type."); // defensive. should b in v.union???? 
+      throw new ConvexError("Invalid submission type.");
     }
 
-
-    const id = await ctx.db.insert("songs", {
-        submitter: {
-            name: name.trim(),
-            email: email.trim(),
-        },
-
-        submissionType,
-        songSearch: songSearch?.trim() ?? undefined,
-        youtubeUrl: args.youtubeUrl?.trim() ?? undefined,
-        songFile: songFile?.trim() ?? undefined,
-        additionalInfo: additionalInfo?.trim() ?? undefined,
-        isAccepted: false
+    const result: { id: Id<"songs"> } = await ctx.runMutation(internal.songs.createSong, {
+      name,
+      email,
+      additionalInfo,
+      submissionType,
+      songSearch,
+      youtubeId,
+      title: youtubeTitle,
+      artist: youtubeChannelName || name,
+      songFile,
     });
 
-    return { id };
+    return result;
   },
 });
 
-
 export const listApproved = query({
-    handler: async(ctx) => {
-        const identity  = await ctx.auth.getUserIdentity();
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
 
-        if (!identity?.subject) {
-            throw new ConvexError ("Unauthorized")
-        }
+    if (!identity?.subject) {
+      throw new ConvexError("Unauthorized");
+    }
 
-        const songs = ctx.db.query("songs").withIndex("by_accepted", q => q.eq("isAccepted", true))
-    },
-})
+    const songs = await ctx.db
+      .query("songs")
+      .withIndex("by_accepted", q => q.eq("isAccepted", true))
+      .collect();
+
+    return songs;
+  },
+});

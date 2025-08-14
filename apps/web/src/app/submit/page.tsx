@@ -31,7 +31,7 @@ import { Upload, Youtube, Search } from "lucide-react";
 import { FileUpload } from "@/components/file-upload";
 import { toast } from "sonner";
 import { ConvexError } from "convex/values";
-import { useMutation } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { api } from "@ls/backend/convex/_generated/api";
 
 // Helper: validate many Youtube URL variants (watch, youtu.be, embed, v/, mobile)
@@ -54,7 +54,6 @@ const formSchema = z
     })
     .superRefine((data, ctx) => {
         // If no submission type is selected yet, don't add an error to the radio group.
-        // We will enforce selection at submit time (and set errors on the relevant fields).
         if (!data.submissionType) return;
 
         if (data.submissionType === "search") {
@@ -106,8 +105,12 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function SubmitSongPage() {
     const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [lastSubmission, setLastSubmission] = useState<
+        { name: string; email: string; submissionType: string; detail?: string } | null
+    >(null);
 
-    const addSong = useMutation(api.songs.addSong)
+    const addSong = useAction(api.songs.addSong);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -125,9 +128,7 @@ export default function SubmitSongPage() {
 
     const watchedSubmissionType = form.watch("submissionType");
 
-
     useEffect(() => {
-
         const clearAndValidate = async () => {
             if (watchedSubmissionType === "search") {
                 form.setValue("youtubeUrl", undefined, { shouldValidate: true });
@@ -147,7 +148,6 @@ export default function SubmitSongPage() {
     }, [watchedSubmissionType, form]);
 
     const onSubmit = async (values: FormValues) => {
-
         const payload = {
             name: values.name.trim(),
             email: values.email.trim(),
@@ -158,15 +158,27 @@ export default function SubmitSongPage() {
             songFile: values.songFile?.trim() || undefined,
         };
 
-
         try {
-            
             await toast.promise(addSong(payload), {
                 loading: "Anfrage wird versendet...",
                 success: () => {
-                    // reset form on success
+                    setIsSubmitted(true);
                     form.reset();
                     setSelectedFileUrl(null);
+
+                    const detail =
+                        payload.submissionType === "search"
+                            ? payload.songSearch
+                            : payload.submissionType === "youtube"
+                                ? payload.youtubeUrl
+                                : payload.songFile;
+
+                    setLastSubmission({
+                        name: payload.name,
+                        email: payload.email,
+                        submissionType: payload.submissionType,
+                        detail: detail,
+                    });
                     return "Song erfolgreich hinzugefügt";
                 },
                 error: (err: unknown) => {
@@ -182,6 +194,62 @@ export default function SubmitSongPage() {
         }
     };
 
+    // If submitted, show a thank-you card with details and contact info
+    if (isSubmitted && lastSubmission) {
+        const { name, email, submissionType, detail } = lastSubmission;
+        return (
+            <div className="container mx-auto px-4 py-8 max-w-2xl">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Danke für deine Einsendung!</CardTitle>
+                        <CardDescription>
+                            Wir haben deine Einreichung erhalten und senden dir eine Bestätigung an{" "}
+                            <strong>{email}</strong>.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="mb-4">
+                            Hallo <strong>{name}</strong>, danke, dass du deinen Song eingereicht
+                            hast.
+                        </p>
+
+                        <div className="mb-4">
+                            <h4 className="font-medium">Eingabedetails</h4>
+                            <ul className="mt-2 space-y-1 text-sm">
+                                <li>
+                                    <strong>Art der Einsendung:</strong> {submissionType}
+                                </li>
+                                {detail && (
+                                    <li>
+                                        <strong>Referenz:</strong>{" "}
+                                        <span className="break-all">{detail}</span>
+                                    </li>
+                                )}
+                            </ul>
+                        </div>
+
+                        <p className="mb-4 text-sm text-muted-foreground">
+                            Falls du etwas ändern möchtest, antworte einfach auf die Bestätigungs-E‑Mail
+                            .
+                        </p>
+
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={() => {
+                                    setIsSubmitted(false);
+                                    setLastSubmission(null);
+                                }}
+                            >
+                                Weitere Einsendung
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    // Otherwise show the form
     return (
         <div className="container mx-auto px-4 py-8 max-w-2xl">
             <Card>
@@ -254,7 +322,6 @@ export default function SubmitSongPage() {
                                                     value={field.value}
                                                     onValueChange={(v) => {
                                                         field.onChange(v);
-                                                        // also trigger immediate validation when user changes selection
                                                         form.trigger("submissionType");
                                                     }}
                                                     className="flex flex-col space-y-2"
@@ -329,7 +396,6 @@ export default function SubmitSongPage() {
                                             <FormItem>
                                                 <FormLabel>Upload file</FormLabel>
                                                 <FormControl>
-                                                    {/* Wrap FileUpload in a div to ensure a single child */}
                                                     <div>
                                                         <FileUpload
                                                             onChange={(url) => {

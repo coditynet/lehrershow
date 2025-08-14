@@ -14,7 +14,9 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as healthCheck from "../healthCheck.js";
+import type * as settings from "../settings.js";
 import type * as songs from "../songs.js";
+import type * as turnstile from "../turnstile.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -26,7 +28,9 @@ import type * as songs from "../songs.js";
  */
 declare const fullApi: ApiFromModules<{
   healthCheck: typeof healthCheck;
+  settings: typeof settings;
   songs: typeof songs;
+  turnstile: typeof turnstile;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
