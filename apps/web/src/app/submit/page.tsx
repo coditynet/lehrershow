@@ -51,6 +51,7 @@ const formSchema = z
     songSearch: z.string().optional(),
     youtubeUrl: z.string().optional(),
     songFile: z.string().optional(),
+    songName: z.string().optional()
   })
   .superRefine((data, ctx) => {
     if (!data.submissionType) return;
@@ -127,6 +128,7 @@ export default function SubmitSongPage() {
       songSearch: "",
       youtubeUrl: "",
       songFile: "",
+      songName: ""
     },
     mode: "onChange",
   });
@@ -166,6 +168,7 @@ export default function SubmitSongPage() {
       songSearch: values.songSearch?.trim() || undefined,
       youtubeUrl: values.youtubeUrl?.trim() || undefined,
       songFile: values.songFile?.trim() || undefined,
+      songName: values.songName?.trim() || undefined,
       turnstileToken: turnstileToken
     };
 
@@ -565,85 +568,115 @@ export default function SubmitSongPage() {
                 )}
 
                 {watchedSubmissionType === "file" && (
-                  <motion.div
-                    key="file"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <FormField
-                      control={form.control}
-                      name="songFile"
-                      render={({ field }: { field: ControllerRenderProps<FormValues, "songFile"> }) => {
-                        const getFileName = (url?: string | null) => {
-                          if (!url) return "Uploaded file";
-                          try {
-                            const pathname = new URL(url).pathname;
-                            const name = decodeURIComponent(pathname.split("/").pop() ?? url);
-                            return name;
-                          } catch {
-                            return url;
-                          }
-                        };
-
-                        return (
+                  <>
+                    <motion.div
+                      key="songName"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <FormField
+                        control={form.control}
+                        name="songName"
+                        render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-foreground/80">Upload File</FormLabel>
+                            <FormLabel className="text-foreground/80">Song Name</FormLabel>
                             <FormControl>
-                              <div className="border-primary/20 rounded-xl border bg-white/5 p-6 backdrop-blur-md">
-                                {!selectedFileUrl ? (
-                                  <FileUpload
-                                    onChange={(url) => {
-                                      field.onChange(url ?? undefined);
-                                      setSelectedFileUrl(url ?? null);
-                                    }}
-                                    endpoint={"songUploader"}
-                                  />
-                                ) : (
-                                  <div className="flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-4">
-                                      <div className="flex flex-col">
-                                        <a
-                                          href={selectedFileUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-sm font-medium text-foreground underline-offset-2 hover:underline break-all"
-                                        >
-                                          {getFileName(selectedFileUrl)}
-                                        </a>
-                                        <span className="text-xs text-muted-foreground">Uploaded file</span>
-                                      </div>
-                                    </div>
-
-                                    <div className="flex-shrink-0">
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          // clear the form field and local state so user can upload again
-                                          field.onChange(undefined);
-                                          setSelectedFileUrl(null);
-                                          // also clear any validation errors related to songFile
-                                          form.clearErrors("songFile");
-                                        }}
-                                        className="rounded-md bg-rose-600 px-3 py-2 text-xs font-medium text-white hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-300"
-                                      >
-                                        Remove
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
+                              <input
+                                placeholder="Enter the song title"
+                                {...field}
+                                className="border-primary/20 text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-primary/30 w-full rounded-xl border bg-white/5 px-6 py-4 backdrop-blur-md transition-all focus:ring-2 focus:outline-none"
+                              />
                             </FormControl>
                             <FormDescription className="text-muted-foreground/70 text-sm">
-                              Erlaubte formate: MP3, Max 16MB
+                              The title of your uploaded song
                             </FormDescription>
                             <FormMessage className="text-destructive text-sm" />
                           </FormItem>
-                        );
-                      }}
-                    />
-                  </motion.div>
+                        )}
+                      />
+                    </motion.div>
+                    <motion.div
+                      key="file"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <FormField
+                        control={form.control}
+                        name="songFile"
+                        render={({ field }: { field: ControllerRenderProps<FormValues, "songFile"> }) => {
+                          const getFileName = (url?: string | null) => {
+                            if (!url) return "Uploaded file";
+                            try {
+                              const pathname = new URL(url).pathname;
+                              const name = decodeURIComponent(pathname.split("/").pop() ?? url);
+                              return name;
+                            } catch {
+                              return url;
+                            }
+                          };
+
+                          return (
+                            <FormItem>
+                              <FormLabel className="text-foreground/80">Upload File</FormLabel>
+                              <FormControl>
+                                <div className="border-primary/20 rounded-xl border bg-white/5 p-6 backdrop-blur-md">
+                                  {!selectedFileUrl ? (
+                                    <FileUpload
+                                      onChange={(url) => {
+                                        field.onChange(url ?? undefined);
+                                        setSelectedFileUrl(url ?? null);
+                                      }}
+                                      endpoint={"songUploader"}
+                                    />
+                                  ) : (
+                                    <div className="flex items-center justify-between gap-4">
+                                      <div className="flex items-center gap-4">
+                                        <div className="flex flex-col">
+                                          <a
+                                            href={selectedFileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm font-medium text-foreground underline-offset-2 hover:underline break-all"
+                                          >
+                                            {getFileName(selectedFileUrl)}
+                                          </a>
+                                          <span className="text-xs text-muted-foreground">Uploaded file</span>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex-shrink-0">
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            // clear the form field and local state so user can upload again
+                                            field.onChange(undefined);
+                                            setSelectedFileUrl(null);
+                                            // also clear any validation errors related to songFile
+                                            form.clearErrors("songFile");
+                                          }}
+                                          className="rounded-md bg-rose-600 px-3 py-2 text-xs font-medium text-white hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-300"
+                                        >
+                                          Remove
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </FormControl>
+                              <FormDescription className="text-muted-foreground/70 text-sm">
+                                Erlaubte formate: MP3, Max 16MB
+                              </FormDescription>
+                              <FormMessage className="text-destructive text-sm" />
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    </motion.div>
+                  </>
                 )}
               </AnimatePresence>
             </motion.div>

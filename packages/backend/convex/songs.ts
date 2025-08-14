@@ -163,6 +163,7 @@ export const addSong = action({
     youtubeUrl: v.optional(v.string()),
     songFile: v.optional(v.string()),
     turnstileToken: v.string(),
+    songName: v.optional(v.string())
   },
   handler: async (ctx, args) => {
     const {
@@ -173,6 +174,7 @@ export const addSong = action({
       songSearch,
       youtubeUrl,
       songFile,
+      songName,
       turnstileToken,
     } = args;
 
@@ -226,6 +228,12 @@ export const addSong = action({
           "songFile must be a valid UploadThing URL served from the configured UPLOADTHING_ID."
         );
       }
+
+      if (!songName || !songName.trim()) {
+        throw new ConvexError(
+          "For file submissions, please provide a songName."
+        );
+      }
     } else {
       throw new ConvexError("Invalid submission type.");
     }
@@ -240,7 +248,7 @@ export const addSong = action({
       finalTitle = songSearch;
       finalArtist = name; 
     } else if (submissionType === "file") {
-      finalTitle = "Uploaded Song"; 
+      finalTitle = songName;
       finalArtist = name; 
     } else {
       finalTitle = undefined;
