@@ -7,7 +7,7 @@ import { Bricolage_Grotesque } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Particles } from "@/components/ui/particles";
 import { Spotlight } from "@/components/ui/spotlight";
-import { SignedOut, SignUp } from "@clerk/nextjs";
+import { SignedOut, SignUp, useAuth } from "@clerk/nextjs";
 
 const brico = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -20,6 +20,14 @@ export default function SignUpPage() {
   useEffect(() => {
     setColor(resolvedTheme === "dark" ? "#ffffff" : "#e60a64");
   }, [resolvedTheme]);
+
+  const session = useAuth()
+
+  if (session.userId) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/dashboard";
+    }
+  }
 
   return (
     <SignedOut>
