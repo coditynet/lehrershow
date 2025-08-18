@@ -92,7 +92,7 @@ const formSchema = z
           ctx.addIssue({
             path: ["songFile"],
             code: z.ZodIssueCode.custom,
-            message: "Uploaded file must be a valid URL.",
+            message: "Die hochgeladene Datei muss eine gültige URL sein.",
           });
         }
       }
@@ -156,7 +156,7 @@ export default function SubmitSongPage() {
 
   const onSubmit = async (values: FormValues) => {
     if (!turnstileToken) {
-      toast.error("Bitte bestätige das Captcha (Turnstile).");
+      toast.error("Bitte bestätige das Captcha");
       return;
     }
 
@@ -236,7 +236,7 @@ export default function SubmitSongPage() {
               brico.className,
             )}
           >
-            Thank you{' '}
+            Dankeschön{' '}
             <span className="bg-primary from-foreground to-primary via-rose-300 bg-clip-text text-transparent dark:bg-gradient-to-b">
               {name}!
             </span>
@@ -248,9 +248,7 @@ export default function SubmitSongPage() {
             transition={{ duration: 1, delay: 0.5 }}
             className="text-muted-foreground mt-2 mb-12 sm:text-lg"
           >
-            We've received your submission and will send a confirmation to
-            <br className="hidden sm:block" />
-            <strong>{email}</strong>
+            Wir haben deine Einreichung erhalten.
           </motion.p>
 
           <motion.div
@@ -263,8 +261,8 @@ export default function SubmitSongPage() {
             )}
           >
             <div className="space-y-2 text-sm">
-              <div><strong>Submission type:</strong> {submissionType}</div>
-              {detail && <div className="break-all"><strong>Reference:</strong> {detail}</div>}
+              <div><strong>Hochgeladen:</strong> {submissionType}</div>
+              {detail && <div className="break-all"><strong>Referenz:</strong> {detail}</div>}
             </div>
           </motion.div>
 
@@ -276,10 +274,10 @@ export default function SubmitSongPage() {
               setIsSubmitted(false);
               setLastSubmission(null);
             }}
-            className="group text-primary-foreground focus:ring-primary/50 relative overflow-hidden rounded-xl bg-gradient-to-b from-rose-500 to-rose-700 px-8 py-4 font-semibold text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] transition-all duration-300 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] focus:ring-2 focus:outline-none active:scale-95"
+            className="group focus:ring-primary/50 relative overflow-hidden rounded-xl bg-gradient-to-b from-rose-500 to-rose-700 px-8 py-4 font-semibold text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] transition-all duration-300 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] focus:ring-2 focus:outline-none active:scale-95"
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              Submit Another Song
+              Einen weiteren Song einreichen
               <Sparkles className="h-4 w-4 transition-all duration-300 group-hover:rotate-12" />
             </span>
             <span className="to-primary absolute inset-0 z-0 bg-gradient-to-r from-rose-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
@@ -332,10 +330,11 @@ export default function SubmitSongPage() {
               brico.className,
             )}
           >
-            Submit Your{' '}
+            Reiche deinen{' '}
             <span className="bg-primary from-foreground to-primary via-rose-300 bg-clip-text text-transparent dark:bg-gradient-to-b">
               Song
             </span>
+             {' '}ein
           </motion.h1>
 
           <motion.p
@@ -344,9 +343,9 @@ export default function SubmitSongPage() {
             transition={{ duration: 1, delay: 0.5 }}
             className="text-muted-foreground mt-2 mb-12 sm:text-lg"
           >
-            Submit via search, YouTube URL or upload a file
+            Reiche deinen Song über Suche, YouTube oder Datei-Upload ein,
             <br className="hidden sm:block" />
-            We'll process your submission quickly
+            Und wir kümmern uns um den Rest!
           </motion.p>
         </div>
 
@@ -383,7 +382,7 @@ export default function SubmitSongPage() {
                   name="email"
                   render={({ field }: { field: ControllerRenderProps<FormValues, "email"> }) => (
                     <FormItem>
-                      <FormLabel className="text-foreground/80">Email</FormLabel>
+                      <FormLabel className="text-foreground/80">E-mail</FormLabel>
                       <FormControl>
                         <input
                           placeholder="you@domain.com"
@@ -402,17 +401,17 @@ export default function SubmitSongPage() {
                 name="anmerkungen"
                 render={({ field }: { field: ControllerRenderProps<FormValues, "anmerkungen"> }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground/80">Additional Notes</FormLabel>
+                    <FormLabel className="text-foreground/80">Zusätzliche Info</FormLabel>
                     <FormControl>
                       <textarea
-                        placeholder="Optional notes..."
+                        placeholder="Von 0:30 bis 0:50 rauschneiden. Bei 1:20 bitte das Licht ausmachen."
                         {...field}
                         rows={3}
                         className="border-primary/20 text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-primary/30 w-full rounded-xl border bg-white/5 px-6 py-4 backdrop-blur-md transition-all focus:ring-2 focus:outline-none resize-none"
                       />
                     </FormControl>
                     <FormDescription className="text-muted-foreground/70 text-sm">
-                      Optional additional information
+                      Optional( sollte hier nichts stehen nehmen wir das Lied so wie es ist.)
                     </FormDescription>
                     <FormMessage className="text-destructive text-sm" />
                   </FormItem>
@@ -432,7 +431,7 @@ export default function SubmitSongPage() {
                 name="submissionType"
                 render={({ field }: { field: ControllerRenderProps<FormValues, "submissionType"> }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground/80">How would you like to submit your song?</FormLabel>
+                    <FormLabel className="text-foreground/80">Wie willst du deinen Song hochladen</FormLabel>
                     <FormControl>
                       <RadioGroup
                         value={field.value}
@@ -449,8 +448,8 @@ export default function SubmitSongPage() {
                           <RadioGroupItem disabled={true} value="search" id="search" className="sr-only" />
                           <Label htmlFor="search" className="flex flex-col items-center gap-2 cursor-pointer opacity-50">
                             <Search className="h-6 w-6" />
-                            <span className="font-medium">Song Search</span>
-                            <span className="text-xs text-muted-foreground text-center">Coming Soon</span>
+                            <span className="font-medium">Song suche</span>
+                            <span className="text-xs text-muted-foreground text-center">Kommt bald</span>
                           </Label>
                         </div>
 
@@ -462,7 +461,7 @@ export default function SubmitSongPage() {
                           <Label htmlFor="youtube" className="flex flex-col items-center gap-2 cursor-pointer">
                             <Youtube className="h-6 w-6" />
                             <span className="font-medium">YouTube URL</span>
-                            <span className="text-xs text-muted-foreground text-center">Paste a YouTube link</span>
+                            <span className="text-xs text-muted-foreground text-center">Füge einen Youtube Link ein</span>
                           </Label>
                         </div>
 
@@ -473,8 +472,8 @@ export default function SubmitSongPage() {
                           <RadioGroupItem value="file" id="file" className="sr-only" />
                           <Label htmlFor="file" className="flex flex-col items-center gap-2 cursor-pointer">
                             <Upload className="h-6 w-6" />
-                            <span className="font-medium">File Upload</span>
-                            <span className="text-xs text-muted-foreground text-center">Upload audio file</span>
+                            <span className="font-medium">Datei Upload</span>
+                            <span className="text-xs text-muted-foreground text-center">Eine (bearbeitete) Audio datei hochladen</span>
                           </Label>
                         </div>
                       </RadioGroup>
@@ -508,7 +507,7 @@ export default function SubmitSongPage() {
                             />
                           </FormControl>
                           <FormDescription className="text-muted-foreground/70 text-sm">
-                            Suche nach einem Spoitfy Song
+                            Suche nach einem Spotify Song
                           </FormDescription>
                           <FormMessage className="text-destructive text-sm" />
                         </FormItem>
@@ -571,7 +570,7 @@ export default function SubmitSongPage() {
                               />
                             </FormControl>
                             <FormDescription className="text-muted-foreground/70 text-sm">
-                              The title of your uploaded song
+                              Der Titel des hochgeladenen Songs.
                             </FormDescription>
                             <FormMessage className="text-destructive text-sm" />
                           </FormItem>
@@ -625,7 +624,7 @@ export default function SubmitSongPage() {
                                           >
                                             {getFileName(selectedFileUrl)}
                                           </a>
-                                          <span className="text-xs text-muted-foreground">Uploaded file</span>
+                                          <span className="text-xs text-muted-foreground">Hochgeladene Datei</span>
                                         </div>
                                       </div>
 
@@ -649,7 +648,7 @@ export default function SubmitSongPage() {
                                 </div>
                               </FormControl>
                               <FormDescription className="text-muted-foreground/70 text-sm">
-                                Erlaubte formate: MP3, Max 16MB
+                                Erlaubte formate: MP3, Max 16MB!!!!!!!!!!!!!!!!!!!!
                               </FormDescription>
                               <FormMessage className="text-destructive text-sm" />
                             </FormItem>
@@ -699,10 +698,10 @@ export default function SubmitSongPage() {
               <button
                 type="submit"
                 disabled={form.formState.isSubmitting}
-                className="group text-primary-foreground focus:ring-primary/50 relative w-full overflow-hidden rounded-xl bg-gradient-to-b from-rose-500 to-rose-700 px-8 py-4 font-semibold text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] transition-all duration-300 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] focus:ring-2 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                className="group focus:ring-primary/50 relative w-full overflow-hidden rounded-xl bg-gradient-to-b from-rose-500 to-rose-700 px-8 py-4 font-semibold text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] transition-all duration-300 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] focus:ring-2 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  {form.formState.isSubmitting ? 'Submitting...' : 'Submit Song'}
+                  {form.formState.isSubmitting ? 'einreichend...' : 'Song einreichen'}
                   <Sparkles className="h-4 w-4 transition-all duration-300 group-hover:rotate-12" />
                 </span>
                 <span className="to-primary absolute inset-0 z-0 bg-gradient-to-r from-rose-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
