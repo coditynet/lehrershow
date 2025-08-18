@@ -648,7 +648,7 @@ export default function SubmitSongPage() {
                                 </div>
                               </FormControl>
                               <FormDescription className="text-muted-foreground/70 text-sm">
-                                Erlaubte formate: MP3, Max 16MB!!!!!!!!!!!!!!!!!!!!
+                                Erlaubte formate: MP3, Max 16MB <a className="underline text-blue-600" href="https://www.freeconvert.com/de/mp4-to-mp3" target="blank">Hilfe</a>
                               </FormDescription>
                               <FormMessage className="text-destructive text-sm" />
                             </FormItem>
