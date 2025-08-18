@@ -63,7 +63,7 @@ export function NavUser() {
                   alt={user?.fullName || "Avatar"}
                 />
                 <AvatarFallback className="rounded-full">
-                  {user!.firstName!.charAt(0) + user!.lastName!.charAt(0)}
+                  {(user?.firstName?.charAt(0) || "") + (user?.lastName?.charAt(0) || "") || "NA"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
