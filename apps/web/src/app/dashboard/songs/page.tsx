@@ -20,6 +20,7 @@ import {
   Youtube,
   FileAudio,
   Search,
+  InfoIcon,
 } from "lucide-react";
 import type { Doc } from "@ls/backend/convex/_generated/dataModel";
 
@@ -104,7 +105,7 @@ function SongCard({ song }: { song: Song }) {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Link in Zwischenablage kopiert");
+      toast.success("Link kopiert")
     } catch {
       toast.error("Kopieren fehlgeschlagen");
     }
@@ -174,10 +175,10 @@ function SongCard({ song }: { song: Song }) {
                   {song.submissionType === "youtube"
                     ? "YouTube"
                     : song.submissionType === "file"
-                    ? "File Upload"
-                    : song.submissionType === "search"
-                    ? "Search"
-                    : "Unknown"}
+                      ? "File Upload"
+                      : song.submissionType === "search"
+                        ? "Search"
+                        : "Unknown"}
                 </Badge>
               </div>
 
@@ -224,28 +225,35 @@ function SongCard({ song }: { song: Song }) {
         ) : null}
 
         <div className="flex gap-2">
-          <Button onClick={openSheet} className="flex-1">
-            <Play className="mr-2 h-4 w-4" />
-            Öffnen
-          </Button>
-
           {song.submissionType === "youtube" && song.youtubeId && (
-            <Button asChild variant="outline">
-              <a
-                href={`https://youtube.com/watch?v=${song.youtubeId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3"
+            <>
+              <Button asChild className="flex-1">
+                <a
+                  href={`https://youtube.com/watch?v=${song.youtubeId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  YouTube
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://youtube.com/watch?v=${song.youtubeId}`);
+                  toast.success("Link kopiert")
+                }}
+                className="border px-3"
               >
-                <ExternalLink className="h-4 w-4" />
-                YouTube
-              </a>
-            </Button>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </>
           )}
 
           {song.submissionType === "file" && song.songFile && (
             <>
-              <Button asChild variant="outline">
+              <Button asChild className="flex-1">
                 <a
                   href={song.songFile}
                   target="_blank"
@@ -253,6 +261,7 @@ function SongCard({ song }: { song: Song }) {
                   className="flex items-center px-3"
                 >
                   <ExternalLink className="h-4 w-4" />
+                  Öffnen
                 </a>
               </Button>
               <Button
@@ -264,6 +273,10 @@ function SongCard({ song }: { song: Song }) {
               </Button>
             </>
           )}
+
+          <Button onClick={openSheet} className="" variant={"outline"}>
+            <InfoIcon className=" h-4 w-4" />
+          </Button>
         </div>
       </div>
     </Card>
