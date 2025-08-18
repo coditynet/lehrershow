@@ -226,25 +226,6 @@ export default function SubmitSongPage() {
         />
 
         <div className="relative z-[100] mx-auto max-w-2xl px-4 py-16 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="border-primary/10 from-primary/15 to-primary/5 mb-8 inline-flex items-center gap-2 rounded-full border bg-gradient-to-r px-4 py-2 backdrop-blur-sm"
-          >
-            <img
-              src="/logo.png"
-              alt="logo"
-              className="spin h-6 w-6 filter dark:invert dark:brightness-200"
-            />
-            <span className="text-sm font-medium">Codity</span>
-            <motion.div
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
-            >
-              <ArrowRight className="h-4 w-4" />
-            </motion.div>
-          </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
