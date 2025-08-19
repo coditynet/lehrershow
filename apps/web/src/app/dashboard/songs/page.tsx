@@ -21,6 +21,7 @@ import {
   FileAudio,
   Search,
   InfoIcon,
+  Music,
 } from "lucide-react";
 import type { Doc } from "@ls/backend/convex/_generated/dataModel";
 
@@ -124,7 +125,7 @@ function SongCard({ song }: { song: Song }) {
       case "file":
         return <FileAudio className="h-3 w-3" />;
       case "search":
-        return <Search className="h-3 w-3" />;
+        return <Music className="h-3 w-3" />;
       default:
         return <ImageIcon className="h-3 w-3" />;
     }
@@ -177,7 +178,7 @@ function SongCard({ song }: { song: Song }) {
                     : song.submissionType === "file"
                       ? "File Upload"
                       : song.submissionType === "search"
-                        ? "Search"
+                        ? "Spotify"
                         : "Unknown"}
                 </Badge>
               </div>
