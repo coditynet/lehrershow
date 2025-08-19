@@ -26,7 +26,7 @@ export const FileUpload = ({ onChange, endpoint }: FileUploadProps) => {
       onUploadError={(error: Error) => {
         toast.error(error.message);
       }}
-      className="w-full"
+      className="w-full mt-5 mb-5"
     />
   );
 };

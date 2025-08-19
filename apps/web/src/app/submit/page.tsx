@@ -29,6 +29,7 @@ import { ConvexError } from "convex/values";
 import { useAction } from "convex/react";
 import { api } from "@ls/backend/convex/_generated/api";
 import Turnstile from "react-turnstile";
+import { SpotifySearch } from "@/components/SpotifySearch";
 
 const brico = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -101,6 +102,13 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>;
 
+type Song = {
+  id: string;
+  title: string;
+  artist: string;
+  albumArt: string;
+};
+
 export default function SubmitSongPage() {
   const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -153,6 +161,13 @@ export default function SubmitSongPage() {
 
     clearAndValidate();
   }, [watchedSubmissionType, form]);
+
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+
+  const handleSongSelected = (song: Song | null) => {
+  setSelectedSong(song);
+  console.log("Selected song in page:", song);
+};
 
   const onSubmit = async (values: FormValues) => {
     if (!turnstileToken) {
@@ -445,11 +460,11 @@ export default function SubmitSongPage() {
                           "border-primary/20 hover:border-primary/40 relative rounded-xl border bg-white/5 p-4 backdrop-blur-md transition-all cursor-pointer",
                           field.value === "search" && "border-primary/60 bg-primary/10"
                         )}>
-                          <RadioGroupItem disabled={true} value="search" id="search" className="sr-only" />
-                          <Label htmlFor="search" className="flex flex-col items-center gap-2 cursor-pointer opacity-50">
-                            <Search className="h-6 w-6" />
+                          <RadioGroupItem value="search" id="search" className="sr-only" />
+                          <Label htmlFor="search" className="flex flex-col items-center gap-2 cursor-pointer ">
+                            <Search className="h-6 w-6"/>
                             <span className="font-medium">Song suche</span>
-                            <span className="text-xs text-muted-foreground text-center">Kommt bald</span>
+                            <span className="text-xs text-muted-foreground text-center">Suche auf Spotify nach einem Lied</span>
                           </Label>
                         </div>
 
@@ -493,26 +508,25 @@ export default function SubmitSongPage() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <FormField
-                      control={form.control}
-                      name="songSearch"
-                      render={({ field }: { field: ControllerRenderProps<FormValues, "songSearch"> }) => (
-                        <FormItem>
-                          <FormLabel className="text-foreground/80">Suche</FormLabel>
-                          <FormControl>
-                            <input
-                              placeholder="Title, artist or keywords"
-                              {...field}
-                              className="border-primary/20 text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-primary/30 w-full rounded-xl border bg-white/5 px-6 py-4 backdrop-blur-md transition-all focus:ring-2 focus:outline-none"
-                            />
-                          </FormControl>
-                          <FormDescription className="text-muted-foreground/70 text-sm">
-                            Suche nach einem Spotify Song
-                          </FormDescription>
-                          <FormMessage className="text-destructive text-sm" />
-                        </FormItem>
-                      )}
-                    />
+                   <FormField
+                    control={form.control}
+                    name="songSearch"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-foreground/80">Suche</FormLabel>
+                        <FormControl>
+                          <SpotifySearch 
+                            field={field} 
+                            onSongSelected={handleSongSelected} 
+                          />
+                        </FormControl>
+                        <FormDescription className="text-muted-foreground/70 text-sm">
+                         Suche nach einem Spotify Song
+                        </FormDescription>
+                        <FormMessage className="text-destructive text-sm" />
+                      </FormItem>
+                    )}
+                  />
                   </motion.div>
                 )}
 
@@ -534,7 +548,7 @@ export default function SubmitSongPage() {
                             <input
                               placeholder="https://www.youtube.com/watch?v=..."
                               {...field}
-                              className="border-primary/20 text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-primary/30 w-full rounded-xl border bg-white/5 px-6 py-4 backdrop-blur-md transition-all focus:ring-2 focus:outline-none"
+                              className="border-red-500/30 text-white placeholder:text-gray-500 focus:border-red-500/70 focus:ring-red-500/50 w-full rounded-lg border bg-gray-900/70 py-3 pl-4 pr-10 transition-all focus:ring-2 focus:outline-none"
                             />
                           </FormControl>
                           <FormDescription className="text-muted-foreground/70 text-sm">
@@ -566,7 +580,7 @@ export default function SubmitSongPage() {
                               <input
                                 placeholder="Enter the song title"
                                 {...field}
-                                className="border-primary/20 text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-primary/30 w-full rounded-xl border bg-white/5 px-6 py-4 backdrop-blur-md transition-all focus:ring-2 focus:outline-none"
+                                className="border-red-500/30 text-white placeholder:text-gray-500 focus:border-red-500/70 focus:ring-red-500/50 w-full rounded-lg border bg-gray-900/70 py-3 pl-4 pr-10 transition-all focus:ring-2 focus:outline-none"
                               />
                             </FormControl>
                             <FormDescription className="text-muted-foreground/70 text-sm">
@@ -603,7 +617,7 @@ export default function SubmitSongPage() {
                             <FormItem>
                               <FormLabel className="text-foreground/80">Upload File</FormLabel>
                               <FormControl>
-                                <div className="border-primary/20 rounded-xl border bg-white/5 p-6 backdrop-blur-md">
+                                <div className="border-red-500/30 text-white placeholder:text-gray-500 focus:border-red-500/70 focus:ring-red-500/50 w-full rounded-lg border bg-gray-900/70 py-3 pl-4 pr-10 transition-all focus:ring-2 focus:outline-none">
                                   {!selectedFileUrl ? (
                                     <FileUpload
                                       onChange={(url) => {
@@ -640,7 +654,7 @@ export default function SubmitSongPage() {
                                           }}
                                           className="rounded-md bg-rose-600 px-3 py-2 text-xs font-medium text-white hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-300"
                                         >
-                                          Remove
+                                          Entfernen
                                         </button>
                                       </div>
                                     </div>
@@ -700,7 +714,7 @@ export default function SubmitSongPage() {
                 disabled={form.formState.isSubmitting}
                 className="group focus:ring-primary/50 relative w-full overflow-hidden rounded-xl bg-gradient-to-b from-rose-500 to-rose-700 px-8 py-4 font-semibold text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] transition-all duration-300 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] focus:ring-2 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <span className="relative z-10 flex items-center justify-center gap-2">
+                <span className="relative flex items-center justify-center gap-2">
                   {form.formState.isSubmitting ? 'einreichend...' : 'Song einreichen'}
                   <Sparkles className="h-4 w-4 transition-all duration-300 group-hover:rotate-12" />
                 </span>
