@@ -92,12 +92,13 @@ export default function Dashboard() {
 
 function SongCard({ song }: { song: Song }) {
   const title = song.title ?? "Kein Titel";
-  const youtubeThumb = song.youtubeId
-    ? `https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`
-    : undefined;
+  // const youtubeThumb = song.youtubeId
+  //   ? `https://img.youtube.com/vi/${song.youtubeId}/hqdefault.jpg`
+  //   : undefined;
 
   const submitterName = song.submitter?.name ?? "Unbekannt";
   const submitterEmail = song.submitter?.email ?? "";
+
 
   const artistName = song.artist ?? submitterName;
 
@@ -149,14 +150,13 @@ function SongCard({ song }: { song: Song }) {
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
               <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden">
-                {youtubeThumb ? (
-                  <img src={youtubeThumb} alt={title} className="w-full h-full object-cover" />
-                ) : song.songFile ? (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900">
-                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                  </div>
+                {song.image ? (
+                  <img src={song.image} alt={title} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
+                  <div className={`w-full h-full flex items-center justify-center ${song.songFile
+                      ? "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900"
+                      : "bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900"
+                    }`}>
                     <ImageIcon className="h-6 w-6 text-muted-foreground" />
                   </div>
                 )}
@@ -267,6 +267,32 @@ function SongCard({ song }: { song: Song }) {
               <Button
                 variant="ghost"
                 onClick={() => handleCopy(song.songFile)}
+                className="border px-3"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+
+          {song.submissionType === "search" && song.spotifyId && (
+            <>
+              <Button asChild className="flex-1">
+                <a
+                  href={`https://open.spotify.com/track/${song.spotifyId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center px-3"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Öffnen
+                </a>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  navigator.clipboard.writeText(`https://open.spotify.com/track/${song.spotifyId}`);
+                  toast.success("Link kopiert");
+                }}
                 className="border px-3"
               >
                 <Copy className="h-4 w-4" />

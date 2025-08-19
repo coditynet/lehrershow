@@ -24,6 +24,7 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/file-upload";
+import { SpotifySearch } from "@/components/SpotifySearch";
 import { toast } from "sonner";
 import { ConvexError } from "convex/values";
 import { useAction } from "convex/react";
@@ -48,7 +49,7 @@ const formSchema = z
     email: z.string().email("Invalid email address"),
     anmerkungen: z.string().optional(),
     submissionType: z.enum(["search", "youtube", "file"]).optional(),
-    songSearch: z.string().optional(),
+    spotifyId: z.string().optional(),
     youtubeUrl: z.string().optional(),
     songFile: z.string().optional(),
     songName: z.string().optional()
@@ -57,11 +58,11 @@ const formSchema = z
     if (!data.submissionType) return;
 
     if (data.submissionType === "search") {
-      if (!data.songSearch || !data.songSearch.trim()) {
+      if (!data.spotifyId || !data.spotifyId.trim()) {
         ctx.addIssue({
-          path: ["songSearch"],
+          path: ["spotifyId"],
           code: z.ZodIssueCode.custom,
-          message: "Please provide a search term (title, artist or keywords).",
+          message: "Please select a song from Spotify search results.",
         });
       }
     } else if (data.submissionType === "youtube") {
@@ -125,7 +126,7 @@ export default function SubmitSongPage() {
       email: "",
       anmerkungen: "",
       submissionType: "youtube",
-      songSearch: "",
+      spotifyId: "",
       youtubeUrl: "",
       songFile: "",
       songName: ""
@@ -141,14 +142,14 @@ export default function SubmitSongPage() {
         form.setValue("youtubeUrl", undefined, { shouldValidate: true });
         form.setValue("songFile", undefined, { shouldValidate: true });
       } else if (watchedSubmissionType === "youtube") {
-        form.setValue("songSearch", undefined, { shouldValidate: true });
+        form.setValue("spotifyId", undefined, { shouldValidate: true });
         form.setValue("songFile", undefined, { shouldValidate: true });
       } else if (watchedSubmissionType === "file") {
-        form.setValue("songSearch", undefined, { shouldValidate: true });
+        form.setValue("spotifyId", undefined, { shouldValidate: true });
         form.setValue("youtubeUrl", undefined, { shouldValidate: true });
       }
 
-      form.clearErrors(["songSearch", "youtubeUrl", "songFile", "submissionType"]);
+      form.clearErrors(["spotifyId", "youtubeUrl", "songFile", "submissionType"]);
     };
 
     clearAndValidate();
@@ -165,7 +166,7 @@ export default function SubmitSongPage() {
       email: values.email.trim(),
       additionalInfo: values.anmerkungen?.trim() || undefined,
       submissionType: (values.submissionType ?? "search") as "search" | "youtube" | "file",
-      songSearch: values.songSearch?.trim() || undefined,
+      spotifyId: values.spotifyId?.trim() || undefined,
       youtubeUrl: values.youtubeUrl?.trim() || undefined,
       songFile: values.songFile?.trim() || undefined,
       songName: values.songName?.trim() || undefined,
@@ -184,7 +185,7 @@ export default function SubmitSongPage() {
 
             const detail =
               payload.submissionType === "search"
-                ? payload.songSearch
+                ? payload.spotifyId
                 : payload.submissionType === "youtube"
                   ? payload.youtubeUrl
                   : payload.songFile;
@@ -445,11 +446,11 @@ export default function SubmitSongPage() {
                           "border-primary/20 hover:border-primary/40 relative rounded-xl border bg-white/5 p-4 backdrop-blur-md transition-all cursor-pointer",
                           field.value === "search" && "border-primary/60 bg-primary/10"
                         )}>
-                          <RadioGroupItem disabled={true} value="search" id="search" className="sr-only" />
-                          <Label htmlFor="search" className="flex flex-col items-center gap-2 cursor-pointer opacity-50">
+                          <RadioGroupItem value="search" id="search" className="sr-only" />
+                          <Label htmlFor="search" className="flex flex-col items-center gap-2 cursor-pointer">
                             <Search className="h-6 w-6" />
                             <span className="font-medium">Song suche</span>
-                            <span className="text-xs text-muted-foreground text-center">Kommt bald</span>
+                            <span className="text-xs text-muted-foreground text-center">Suche auf Spotify nach einem Lied</span>
                           </Label>
                         </div>
 
@@ -495,16 +496,12 @@ export default function SubmitSongPage() {
                   >
                     <FormField
                       control={form.control}
-                      name="songSearch"
-                      render={({ field }: { field: ControllerRenderProps<FormValues, "songSearch"> }) => (
+                      name="spotifyId"
+                      render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-foreground/80">Suche</FormLabel>
                           <FormControl>
-                            <input
-                              placeholder="Title, artist or keywords"
-                              {...field}
-                              className="border-primary/20 text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-primary/30 w-full rounded-xl border bg-white/5 px-6 py-4 backdrop-blur-md transition-all focus:ring-2 focus:outline-none"
-                            />
+                            <SpotifySearch field={field} />
                           </FormControl>
                           <FormDescription className="text-muted-foreground/70 text-sm">
                             Suche nach einem Spotify Song

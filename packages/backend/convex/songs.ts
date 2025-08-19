@@ -120,7 +120,8 @@ export const createSong = internalMutation({
       v.literal("youtube"),
       v.literal("file")
     ),
-    songSearch: v.optional(v.string()),
+    image: v.optional(v.string()),
+    spotifyId: v.optional(v.string()),
     youtubeId: v.optional(v.string()),
     title: v.optional(v.string()),
     artist: v.optional(v.string()),
@@ -133,13 +134,14 @@ export const createSong = internalMutation({
         email: args.email.trim(),
       },
       submissionType: args.submissionType,
-      songSearch: args.songSearch?.trim() ?? undefined,
+      spotifyId: args.spotifyId?.trim() ?? undefined,
       youtubeId: args.youtubeId ?? undefined,
       title: args.title ?? undefined,
       artist: args.artist ?? undefined,
       songFile: args.songFile?.trim() ?? undefined,
       additionalInfo: args.additionalInfo?.trim() ?? undefined,
       isAccepted: false,
+      image: args.image
     });
 
     return { id };
@@ -159,7 +161,7 @@ export const addSong = action({
       v.literal("youtube"),
       v.literal("file")
     ),
-    songSearch: v.optional(v.string()),
+    spotifyId: v.optional(v.string()),
     youtubeUrl: v.optional(v.string()),
     songFile: v.optional(v.string()),
     turnstileToken: v.string(),
@@ -171,7 +173,7 @@ export const addSong = action({
       email,
       additionalInfo,
       submissionType,
-      songSearch,
+      spotifyId,
       youtubeUrl,
       songFile,
       songName,
@@ -180,16 +182,18 @@ export const addSong = action({
 
     if (!turnstileToken) throw new ConvexError("Captcha token required.");
 
-    const verifyResult: { success?: boolean } = await ctx.runAction(api.turnstile.verify, {
-      token: turnstileToken,
-    });
+    const verifyResult: { success?: boolean } = await ctx.runAction(
+      api.turnstile.verify,
+      { token: turnstileToken }
+    );
     if (!verifyResult || !verifyResult.success) {
       throw new ConvexError("Captcha verification failed.");
     }
 
-    let youtubeId = undefined;
-    let youtubeTitle = undefined;
-    let youtubeChannelName = undefined;
+    let youtubeId: string | undefined;
+    let title: string | undefined;
+    let artist: string | undefined;
+    let img: string | undefined;
 
     if (!name || !name.trim()) throw new ConvexError("Name is required.");
 
@@ -197,9 +201,16 @@ export const addSong = action({
       throw new ConvexError("A valid email is required.");
 
     if (submissionType === "search") {
-      if (!songSearch || !songSearch.trim()) {
-        throw new ConvexError("For search submissions, provide a songSearch value.");
+      if (!spotifyId || !spotifyId.trim()) {
+        throw new ConvexError("For search submissions, provide a spotifyId.");
       }
+
+      // ✅ Fetch track details from Spotify
+      const track = await ctx.runAction(api.spotify.getById, { id: spotifyId });
+      title = track.title;
+      artist = track.artist;
+      img = track.albumArt || undefined
+
     } else if (submissionType === "youtube") {
       if (!youtubeUrl || !youtubeUrl.trim()) {
         throw new ConvexError("For YouTube submissions, provide a youtubeUrl.");
@@ -212,12 +223,13 @@ export const addSong = action({
 
       youtubeId = id;
 
-      const youtubeInfo: { title?: string; channelName?: string; } = await ctx.runAction(api.songs.fetchYouTubeInfo, {
-        videoId: id,
-      });
-      youtubeTitle = youtubeInfo.title;
-      youtubeChannelName = youtubeInfo.channelName;
-      
+      const youtubeInfo: { title?: string; channelName?: string } =
+        await ctx.runAction(api.songs.fetchYouTubeInfo, {
+          videoId: id,
+        });
+      title = youtubeInfo.title;
+      artist = youtubeInfo.channelName;
+
     } else if (submissionType === "file") {
       if (!songFile || !songFile.trim()) {
         throw new ConvexError("For file submissions, provide a songFile URL.");
@@ -234,39 +246,29 @@ export const addSong = action({
           "For file submissions, please provide a songName."
         );
       }
+
+      title = songName
     } else {
       throw new ConvexError("Invalid submission type.");
     }
 
-    let finalTitle: string | undefined;
-    let finalArtist: string | undefined;
 
-    if (submissionType === "youtube") {
-      finalTitle = youtubeTitle;
-      finalArtist = youtubeChannelName || name; 
-    } else if (submissionType === "search") {
-      finalTitle = songSearch;
-      finalArtist = name; 
-    } else if (submissionType === "file") {
-      finalTitle = songName;
-      finalArtist = name; 
-    } else {
-      finalTitle = undefined;
-      finalArtist = undefined;
-    }
-
-
-    const result: { id: Id<"songs"> } = await ctx.runMutation(internal.songs.createSong, {
-      name,
-      email,
-      additionalInfo,
-      submissionType,
-      songSearch,
-      youtubeId,
-      title: finalTitle, 
-      artist: finalArtist, 
-      songFile,
-    });
+    // ✅ Save to DB
+    const result: { id: Id<"songs"> } = await ctx.runMutation(
+      internal.songs.createSong,
+      {
+        name,
+        email,
+        additionalInfo,
+        submissionType,
+        spotifyId,
+        youtubeId,
+        title,
+        artist,
+        image: img,
+        songFile,
+      }
+    );
 
     return result;
   },

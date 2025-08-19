@@ -14,6 +14,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@convex-dev/action-cache": "^0.2.11",
     "convex": "^1.25.4"
   }
 }

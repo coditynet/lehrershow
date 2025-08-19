@@ -23,7 +23,8 @@ export default defineSchema({
       v.literal("file")
     ),
 
-    songSearch: v.optional(v.string()), 
+    image: v.optional(v.string()),
+    spotifyId: v.optional(v.string()), 
     youtubeId: v.optional(v.string()), 
     songFile: v.optional(v.string()),
   }).index("by_accepted", ["isAccepted"]),
