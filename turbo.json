@@ -5,7 +5,12 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "env": [
+        "UPLOADTHING_TOKEN",
+        "CLERK_SECRET_KEY",
+        "CONVEX_DEPLOY_KEY"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
