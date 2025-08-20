@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "deploy": "turbo -F @ls/backend deploy",
-    "prebuild": "pnpm --filter @ls/backend exec npx convex deploy",
+    "prebuild": "pnpm --filter @ls/backend exec npx convex deploy"
   },
   "dependencies": {
     "@clerk/elements": "^0.23.52",
