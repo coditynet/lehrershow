@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "turbo -F @ls/backend deploy"
+    "deploy": "turbo -F @ls/backend deploy",
     "prebuild": "pnpm --filter @ls/backend exec npx convex deploy",
   },
   "dependencies": {
