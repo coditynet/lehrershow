@@ -3,7 +3,7 @@
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "@ls/backend#deploy"],
+      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
@@ -20,9 +20,6 @@
     "dev:setup": {
       "cache": false,
       "persistent": true
-    },
-    "deploy": {
-      "cache": false
     }
   }
 }
